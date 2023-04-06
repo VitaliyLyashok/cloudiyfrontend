@@ -1,0 +1,119 @@
+.list-group-item {
+    padding: 10px 20px;
+    border-bottom: 1px solid #3d5a80;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.list-group-item:last-child {
+    border-bottom: 1px solid #3d5a80;
+}
+
+.list-group-item span {
+    display: flex;
+    justify-content: flex-start;
+    width: 550px;
+    line-height: 35px;
+    font-size: 20px;
+    font-family: Roboto;
+    color: black;
+    align-items: center;
+    cursor: pointer;
+    margin-left: 20px;
+    margin-right: 100px;
+    text-overflow: ellipsis;
+}
+
+.list-group-item span:hover{
+    cursor: pointer;
+}
+
+.list-group-item input {
+    line-height: 35px;
+    font-size: 20px;
+    text-align: center;
+    border: 0;
+}
+
+.list-group-item button {
+    width: 35px;
+    height: 35px;
+    margin: 3px;
+    font-size: 17px;
+    border: none;
+    cursor: pointer;
+}
+
+.list-group-item .btn-download {
+    color: limegreen;
+}
+
+.list-group-item .btn-trash {
+    color: red; 
+}
+
+
+.list-group-item .btn-share{
+    color:darkorange
+}
+
+.list-group-item .btn-star {
+    color: rgb(0, 145, 223);
+}
+
+
+.iconLocation{
+    display: flex;
+    align-items:center;
+}
+
+.btn-trash:hover{
+    transition: 0.6s all;
+    color: white;
+    background-color: red;
+}
+
+.btn-trash.active{
+    color: white;
+    background-color: red;
+}
+.btn-trash.active:hover{
+    transition: 0.6s all;
+    color: black;
+    background-color: red;
+}
+
+.btn-download:hover{
+    transition: 0.6s all;
+    color: white;
+    background-color: limegreen;  
+}
+
+.btn-share:hover{
+    transition: 0.6s all;
+    color: white;
+    background-color: darkorange;
+}
+
+.btn-star.active{
+    color: white;
+    background-color: rgb(0, 145, 223);
+}
+
+.btn-star:hover{
+    transition: 0.6s all;
+    color: white;
+    background-color: rgb(0, 145, 223);
+}
+
+.btn-star.active:hover{
+    transition: 0.6s all;
+    color: rgb(0, 145, 223);
+    background-color: #F0F0F0;
+}
+
+.icons{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
