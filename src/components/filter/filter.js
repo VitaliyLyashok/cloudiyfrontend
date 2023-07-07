@@ -7,6 +7,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import APIRoutes from '../../routes';
+import { memo } from 'react';
 
 const Filter = (props) => {
     const buttonData = [
@@ -39,4 +40,4 @@ const Filter = (props) => {
     )
 } 
 
-export default Filter
+export default memo(Filter)

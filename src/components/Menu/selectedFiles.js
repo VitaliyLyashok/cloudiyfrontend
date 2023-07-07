@@ -22,7 +22,6 @@ const SelectedFiles = (props) => {
     HTTPservice.get(APIRoutes.GetUser)
     .then((response) => { 
         GetSelectedFiles();
-        console.log(response.data)
       })
     .catch(e => {
         console.log(e);
@@ -49,30 +48,18 @@ const SelectedFiles = (props) => {
   }
 
   const onToggleProp = (id,prop) =>{
-    HTTPservice.post(prop,{fileId: id}).then()
+    HTTPservice.post(prop,{fileId: id}).then((res) => {
+      GetSelectedFiles();
+    })
     .catch(e => {
     console.log(e,);
     });    
   }
 
-  const onDownload = (id, name) =>{
-    HTTPservice.get(APIRoutes.DownloadFile, { fileId: id})
-    .then(response => { 
-      let downloadLink = document.createElement('a');
-
-      const blob = new Blob([response.data], {
-        type: 'application/octet-stream',
-      });
-      const url = window.URL.createObjectURL(blob);
-      downloadLink.href = url;
-      downloadLink.download = name;
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
-  })
-   .catch(e => {
-       console.log(e);
-   });
+  const onDelete = (id) => {
+    HTTPservice.post(APIRoutes.DeleteFile + "/" + id).then((res) => {
+      GetSelectedFiles();
+    }).catch()
   }
 
     return(
@@ -80,7 +67,7 @@ const SelectedFiles = (props) => {
             <FilesList 
             data={data} 
             onToggleProp={onToggleProp} 
-            onDownload={onDownload} 
+            onDelete={onDelete} 
             pathItems={folderPath}
          />
     )

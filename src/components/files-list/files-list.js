@@ -2,25 +2,32 @@ import FilesListItem from "../files-list-item/files-list-item";
 import './files-list.css'
 import { Modal, Box, TextField, Button } from "@mui/material"; 
 import { useState } from "react";
-import cloud from '../../images/cloud.png'
+import cloud from '../../images/cloud1.png'
+import { useNavigate } from "react-router-dom";
+
 import axios from "axios";
 import APIRoutes from "../../routes";
 import HTTPservice from "../../HTTPservice";
 
 
-const FilesList = ({onFolderOpen, onDownload, data, onToggleProp,pathItems}) => {
+const FilesList = ({onFolderOpen, onDelete, deleteFolder, data, onCopy, onToggleProp,pathItems, isSubscribed}) => {
     const elements = data.map(item => {
         const {id, ...itemProps} = item;
     
         return (
             
-            <FilesListItem key={id} {...itemProps} 
+            <FilesListItem key={id}
+            id={id}
+            {...itemProps} 
             onFolderOpen={(e) => onFolderOpen(id,e.currentTarget)}
-            onDownload={(e) => onDownload(id, e.currentTarget.getAttribute('data-toggle'))} 
+            onDelete={(e) => onDelete(id)}
+            deleteFolder={(e) => deleteFolder(id)}
             onToggleProp={(e) => onToggleProp(id, e.currentTarget.getAttribute('data-toggle'))}
             onShare={(e) => onShare(id, e.currentTarget)}
-            onClassnameAdd={(e) => (id, e.currentTarget)}/>
-            
+            onClassnameAdd={(e) => (id, e.currentTarget)}
+            preventDeleteIcon={item.preventDeleteIcon}
+            isSubscribed={isSubscribed}
+            />
             
         )
         
@@ -46,11 +53,17 @@ const FilesList = ({onFolderOpen, onDownload, data, onToggleProp,pathItems}) => 
         sessionStorage.clear();
     };
 
+    const onPath = (id) => {
+        history('?folderId=' + id);
+        window.location.reload();
+    }
+
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState('');
+    let history = useNavigate();
 
     var path =  pathItems.map(x =>{
-        return <><span>{x.Name}</span><span>  /  </span></>
+        return <><span className="pathName" onClick={() =>onPath(x.Id)}>{x.Name}</span><span>  /  </span></>
         })
     return (
         <>

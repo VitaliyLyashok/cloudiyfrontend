@@ -3,28 +3,42 @@ import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import FolderIcon from '@mui/icons-material/Folder';
 import { blue } from '@mui/material/colors';
 import APIRoutes from '../../routes';
+import { Apartment } from '@mui/icons-material';
 
 
 const FilesListItem = (props) => {
-    const {name, isNoticed, isDeleted, onToggleProp, onDownload, onFolderOpen, onShare, isFile} = props;
-
+    const {name,id,  isNoticed, isDeleted, deleteFolder, onDelete, onToggleProp, onFolderOpen, onShare, isSubscribed, isFile} = props;
+    let deletedEvent = isDeleted ? onDelete : onToggleProp;
+    let preventDeleteIcon = props.preventDeleteIcon;    
     let deleted = isDeleted ? "btn-trash active btn-sm " : "btn-trash btn-sm ";
     let noticed = isNoticed ? "btn-star active btn-sm" : "btn-star btn-sm";
-  
+    let copy = isSubscribed ? <button type="button"
+                className="btn-copy btn-sm "
+                onClick={(e) => navigator.clipboard.writeText("http://localhost:3000/SharingPoint?ref=" + window.btoa(id))}>
+                <i className="fas fa-copy"></i>
+            </button> : null;
+    let undoDeletedFile =  <button type="button"
+                            className="btn-copy btn-sm  "
+                            onClick={onToggleProp}
+                            data-toggle={APIRoutes.ToggleDeleted}>
+                            <i class="fas fa-undo"></i>
+                        </button>
+    let iconFunction = isDeleted ? undoDeletedFile : copy 
+
 
     const btns = isFile ? (
         <div className='icons'>
+            {iconFunction}
             <button type="button"
                 className="btn-share btn-sm "
                 onClick={onShare}>
                 <i className="fas fa-share"></i>
             </button>
-            <button type="button"
-                className="btn-download btn-sm "
-                onClick={onDownload}
-                data-toggle={name}>
+            <a type="button"
+                href = {APIRoutes.DownloadFile + '/' + id}
+                className="btn-download btn-sm ">
                 <i className="fas fa-download"></i>
-            </button>
+            </a>
             <button type="button"
                 className={noticed}
                 onClick={onToggleProp}
@@ -33,12 +47,18 @@ const FilesListItem = (props) => {
             </button>
             <button type="button"
                 className={deleted}
-                onClick={onToggleProp}
+                onClick={deletedEvent}
                 data-toggle={APIRoutes.ToggleDeleted}>
                 <i className="fas fa-trash"></i>
             </button>
-             <i className="fas fa-star"></i>
-             </div> ) : <div className="icons"></div>
+             </div> ) : <div className="icons">
+               {preventDeleteIcon ?(<></>): ( <button type="button"
+                    className={deleted}
+                    onClick={deleteFolder}
+                    data-toggle={APIRoutes.DeleteFolder}>
+                    <i className="fas fa-trash"></i>
+                </button>)}
+             </div>
     const event = isFile ? onToggleProp : onFolderOpen
     const icon = isFile ? <InsertDriveFileIcon sx={{ color: blue[500], fontSize: 35 }}/> : <FolderIcon onClick={onFolderOpen} sx={{ cursor: 'pointer',color: blue[500], fontSize: 35 }} />;
     

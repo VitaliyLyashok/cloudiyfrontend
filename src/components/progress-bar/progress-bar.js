@@ -1,19 +1,20 @@
 import './progress-bar.css'
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { Modal, TextField, Box, Button, Grid } from '@mui/material'
-import cloud from '../../images/cloud.png'
+import cloud from '../../images/cloud1.png'
 import axios from 'axios';
 import APIRoutes from '../../routes.js';
 import Helper from '../../Helper.js';
 import HTTPservice from '../../HTTPservice';
 import { htmlPrefilter } from 'jquery';
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 const ProgressBar = ({totalSpace, usedSpace, isSubscribed}) => {
   const [open, setOpen] = useState(false);
   const [idcard, setIdCard] = useState('');
   const [date, setDate] = useState('');
   const [cvc, setCVC] = useState('');
-     
+  console.log('progress bar')
    let total = totalSpace /1024/1024/1024;
    let SpaceUsed = `${usedSpace /1024/1024/1024}`;
    let used = SpaceUsed.slice(0,3);
@@ -30,7 +31,7 @@ const ProgressBar = ({totalSpace, usedSpace, isSubscribed}) => {
   
 
   const onBuy = () =>{
-   HTTPservice.get(APIRoutes.SetSub,{ id: Helper.getCookie('userid')} )
+   HTTPservice.get(APIRoutes.SetSub,{ id: Helper.getCookie('userId')} )
    .then((response) => { 
      })
    .catch(e => {
@@ -40,7 +41,7 @@ const ProgressBar = ({totalSpace, usedSpace, isSubscribed}) => {
 
   let sub = <div></div>;
   if(isSubscribed === false){
-     sub = <button type="button" onClick={() => setOpen(true)} className="subscription">Buy subscription 5$</button>
+     sub = <button type="button" onClick={() => setOpen(true)} className="subscription">Subscription 5$</button>
   }
 
   
@@ -68,63 +69,49 @@ const ProgressBar = ({totalSpace, usedSpace, isSubscribed}) => {
            </div> 
            <p>The $5 Cloudiy plan provides you with 100 GB of storage space to store and 
             access your files, photos, and other digital content. This plan is ideal for 
-            individuals who need a little extra space beyond what the free plan offers,
-             but who do not require the higher storage limits of more expensive plans.</p>
-             <p>With this plan, you can easily and securely back up your important files and 
-              documents, share files with others, and access your content from anywhere, 
-              on any device. You can also use Cloudiy's powerful search capabilities to
-               quickly find the files you need.</p>
-           <TextField
-                   margin="normal"
-                   required
-                   fullWidth
-                   id="idcard"
-                   label="Number of Card"
-                   name="idcard"
-                   value={idcard}
-                   onChange={e => setIdCard(e.target.value)}
-                   autoComplete="off"
-                   autoFocus
-                   sx={{marginTop: 5}}
-               />
-                <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-               <TextField
-                 autoComplete="given-name"
-                 name="date"
-                 required
-                 fullWidth
-                 id="date"
-                 label="Date"
-                 value={date}
-                 onChange={e => setDate(e.target.value)}
-                 autoFocus
-               />
-             </Grid>
-             <Grid item xs={12} sm={6}>
-               <TextField
-                 required
-                 fullWidth
-                 id="cvc"
-                 label="CVC"
-                 name="cvc"
-                 type="password"
-                 value={cvc}
-                 onChange={e => setCVC(e.target.value)}
-               />
-             </Grid>
-             </Grid>
-               <Button
-                   type="submit"
-                   fullWidth
-                   onClick={onBuy}
-                   variant="contained"
-                   sx={{ mt: 3, mb: 2 }}
-               >Buy Subscription</Button>
+            individuals who need a little extra space beyond what the free plan offers
+            With this plan, you can easily and securely back up your important files and 
+              documents, share files with others, You can also use Cloudiy's powerful search capabilities to
+               quickly find the files you need. Also provides the ability to copy the link to the file so that unauthorized users can download it</p>
+               <div className='paypalbtn'>
+               <PayPalScriptProvider
+        options={{
+          "client-id": "AUgF8whMlEELD1KRrv3Bxo91aWaeLqn_4brIgErMQUrG-DZ0R_AjhnMiPVpNovwHyMOhjurBkyUcxLCg",
+          locale: "en_US" // Змініть цей параметр на бажану мову
+        }}
+      >
+        
+        <PayPalButtons
+        
+          createOrder={(data, actions) => {
+            return actions.order.create({
+              purchase_units: [
+                {
+                  amount: {
+                    value: "4.99",
+                  },
+                },
+              ],
+            });
+          }}
+          onApprove={async (data, actions) => {
+          
+            const details = await actions.order.capture();
+            const name = details.payer.name.given_name;
+            
+            onBuy();
+            alert("Transaction completed by " + name);
+          }}
+        />
+      </PayPalScriptProvider>
+      </div>
+          
+           
                </Box>
                </Modal>
+           
        </div>
    )
 }
 
-export default ProgressBar
+export default memo(ProgressBar)

@@ -3,50 +3,55 @@ import * as React from 'react';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import $ from 'jquery';
-import cloud from '../../images/cloud.png'
+import cloud from '../../images/cloud1.png'
 import { Button } from '@mui/material';
 import APIRoutes from '../../routes';
 import Helper from '../../Helper';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import HTTPservice from '../../HTTPservice';
+import { useState, useRef } from 'react';
+import { Route } from 'react-router-dom';
+import axios from 'axios';
+import { DeblurOutlined } from '@mui/icons-material';
+import { memo } from 'react';
+
 
 const FilesAdd = () => {
-
-  const [open, setOpen] = React.useState(false);
+  
+  const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+ 
 
-  function uploadFiles(e,inputId) {
-    e.preventDefault();
+  const fileInputRef = useRef(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
-      var input = document.getElementById(inputId);
-      var files = input.files;
-      var formData = new FormData();
-  
-    for (var i = 0; i != files.length; i++) {
-      formData.append("files", files[i]);
-    }   
-    formData.append("folderId", Helper.getCookie('currentFolderID'));
-    formData.append("userId", Helper.getCookie('userId'));
+  const uploadChunk = async (file, start, end) => {
+    const chunk = file.slice(start, end);
+    const formData = new FormData();
     
+    formData.append("FolderId", Helper.getCookie('currentFolderID'));
+    formData.append("UserId", Helper.getCookie('userId'));
+    formData.append("Filename", file.name);
+    formData.append("Chunk", chunk);
+    await axios.post("https://localhost:7258/FileManagement/UploadFile", formData, {headers: {
+      "Content-Type": "multipart/form-data",
+    }})};
 
-    $.ajax(
-      {
-        url: APIRoutes.UploadFile,
-        data: formData,
-        processData: false,
-        contentType: false,
-        type: "POST",
-        success: function (data) {
-          window.location.reload();
-        }
-        
-      }
-    ); 
-    debugger;
-  }
+  const handleUpload = async () => {
+    const file = fileInputRef.current.files[0];
+    const chunkSize = (1024 * 1024) * 10; // 1 MB
+    for (let start = 0; start < file.size; start += chunkSize) {
+      const end = start + chunkSize;
+      await uploadChunk(file, start, end);
 
+      const progress = Math.round((end / file.size) * 100);
+      setUploadProgress(Math.min(progress, 100));
+    }
 
+    alert("File uploaded successfully.");
+    window.location.reload()
+  };
 
     return(
       
@@ -66,21 +71,25 @@ const FilesAdd = () => {
               <h1 className="title">Cloudiy</h1>            
             </div> 
             <div className="sendFileBtn">
-            <form id="form" name="form"  encType="multipart/form-data"  >
-              <div className="buttons">
+
                 <div className="upload-button">
-                    <input id="files" name="files" type="file" size="1"/>
-                </div>
+
+                    <input className='inputFile' type="file" ref={fileInputRef} />
+
+                  <div className='fileSpan'>
+                    <span>Upload progress: {uploadProgress}%</span><br></br>
+                    <progress value={uploadProgress} max="100" />
+                  </div>
               </div>
-              <Button
+              <Button   
+              onClick={handleUpload}
               fullWidth
-              type="submit"
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
-              multiple onClick={(e) => uploadFiles(e, 'files')}
             >submit</Button>
-            </form>
+            
             </div>  
+            
             
             </Box>
           </Modal>
@@ -91,4 +100,4 @@ const FilesAdd = () => {
 
 
 
-export default FilesAdd
+export default memo(FilesAdd)

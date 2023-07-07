@@ -1,4 +1,4 @@
-import { useEffect, useState,  } from 'react';
+import { useEffect, useState, useCallback,  memo   } from 'react';
 import Head from '../header/header.js';
 import ProgressBar from '../progress-bar/progress-bar.js';
 import Filter from '../filter/filter.js';
@@ -18,43 +18,41 @@ import Deleted from '../Menu/selectedFiles.js';
 import SelectedFiles from '../Menu/selectedFiles.js';
 import { htmlPrefilter } from 'jquery';
 import Spinner from '../spinner/spinner.js';
+import { useSearchParams } from "react-router-dom";
+import SharingPoint from '../sharingPoint.js';
 
 const App = (props) => {
   const [data, setData] = useState([]);
   const [route, setRoute] = useState('');
-  const [folderPath, setFolderPath] = useState(['./']);
+  const [folderPath, setFolderPath] = useState([{
+    Name: './',
+    preventDeleteIcon: true
+  }]);
   const [totalSpace, setTotalSpace] = useState('');
   const [usedSpace, setUsedSpace] = useState('');
   const [username, setUsername] = useState('');
   const [isSubscribed, setIsSubscribed] = useState('');
   const [loading, setLoading] = useState(true);
+  let [searchParams] = useSearchParams();
 
   useEffect(() => {
     setLoading(true)
     HTTPservice.get(APIRoutes.GetUser)
     .then((response) => { 
-        GetFolderFiles(Helper.getCookie('currentFolderID'));
+      const params = new URLSearchParams(window.location.search);
+      const fileIdParam = params.get('folderId');
+      if (!fileIdParam) {
+          GetFolderFiles(Helper.getCookie('currentFolderID'));
+        } else {
+          GetFolderFiles(fileIdParam); 
+        }
+       
     }).catch(e => {
       console.log(e);
     });
     }, [])
 
-    useEffect(() => {
-      HTTPservice.get(APIRoutes.GetUser)
-      .then((response) => { 
-
-        setTotalSpace(response.data.spaceAvaliable);
-        setUsedSpace(response.data.spaceUsed);
-        setUsername(response.data.name);
-        setIsSubscribed(response.data.isSubscribe);
-      }).catch(e => {
-        console.log(e);
-      });
-      }, [])
-    
-  
-
-    const GetFolderFiles = async (id) => {
+    const GetFolderFiles = useCallback(async (id) => {
       try {
         const { data } = await HTTPservice.get(APIRoutes.GetFiles, { folderId: id });
       
@@ -66,66 +64,78 @@ const App = (props) => {
         const folders = childFolders.map(el => ({ ...el, isFile: false }));
        
         if (folderMetadataId) {
-          folders.unshift({ isFile: false, name: '...', id: folderMetadataId });
+          folders.unshift({ isFile: false, name: '...', id: folderMetadataId,preventDeleteIcon:true });
         }
     
         const resultingData = folders.concat(files);
-  
+    
         setData(resultingData);
         setLoading(false)
+        console.log(data)
       } catch (e) {
         console.log(e);
       }
-    };
+    }, [setData]);
+    
 
-  const onFilterSelect = (filter, route) => {
-    setRoute(route);
-    sessionStorage.setItem('filter', filter);
-  }
+    const onFilterSelect = (filter, route) => {
+      setRoute(route);
+      sessionStorage.setItem('filter', filter);
+      GetFolderFiles(Helper.getCookie('currentFolderID'));
+    }
 
-  const onToggleProp = (id,prop) =>{
-    HTTPservice.post(prop,{fileId: id}).then(
-    )
+    useEffect(() => {
+      HTTPservice.get(APIRoutes.GetUser)
+      .then((response) => { 
+     
+        setTotalSpace(response.data.spaceAvaliable);
+        setUsedSpace(response.data.spaceUsed);
+        setUsername(response.data.name);
+        setIsSubscribed(response.data.isSubscribe);
+        console.log(Helper.getCookie('userId')) 
+        console.log(Helper.getCookie('access_token'));
+      }).catch(e => {
+        console.log(e);
+      });
+      }, [])
+    
+  
+
+      
+
+  const onToggleProp = useCallback((id, prop) =>{
+    HTTPservice.post(prop,{fileId: id}).then((res) => {
+      GetFolderFiles(Helper.getCookie('currentFolderID'));
+    })
     .catch(e => {
-    console.log(e);
+      console.log(e);
     });    
-  }
+  }, [GetFolderFiles]);
 
-   const GetPathToFolder = (Id) => {
-    HTTPservice.get(APIRoutes.GetFolderPath, { folderId: Id})
-    .then(response => {
-      setFolderPath(response.data)
-    })
-   .catch(e => {
-       console.log(e);
-   });
-  }
-
-  const onDownload = (id, name) =>{
-    HTTPservice.get(APIRoutes.DownloadFile,{ params: { fileId: id},  observe: 'response',
-    responseType: 'arraybuffer'})
-    .then((response) => {
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', name); //or any other extension
-      document.body.appendChild(link);
-      link.click();
-    })
-   .catch(e => {
-       console.log(e);
-   });
-  }
+  const GetPathToFolder = useCallback((id) => {
+    HTTPservice.get(APIRoutes.GetFolderPath, { folderId: id })
+      .then(response => {
+        setFolderPath(response.data)
+      })
+      .catch(e => {
+        console.log(e);
+      });
+  }, [setFolderPath]);
 
   const onFolderOpen = (id) => {
     Helper.setCookie('currentFolderID', id);
     GetFolderFiles(id);
     GetPathToFolder(id);
   }
-  const onDataSearch = (searchData) => {
+  const onDataSearch = useCallback((searchData) => {
     setData(searchData)
-  }
+  }, []);
 
+  const deleteFolder = (id) => {
+    HTTPservice.post(APIRoutes.DeleteFolder + "/" + id).then((res) => {
+      GetFolderFiles(Helper.getCookie('currentFolderID'));
+    }).catch()
+  }
 
     return(
       <div className="app">
@@ -141,11 +151,13 @@ const App = (props) => {
               <Route exact path='/' element={ loading ? <Spinner/> :
                 <FilesList 
                   data={data} 
-                  onToggleProp={onToggleProp} 
-                  onDownload={onDownload} 
+                  onToggleProp={onToggleProp}  
                   onFolderOpen={onFolderOpen}
                   pathItems={folderPath}
+                  deleteFolder={deleteFolder}
                   onPathItemClick={onFolderOpen}
+                  GetFolderFiles={GetFolderFiles}
+                  isSubscribed={isSubscribed}
                 />
               }/>
               <Route exact path='/SelectedFiles'  element={<SelectedFiles route = {route}/>}/> 
@@ -168,4 +180,4 @@ const App = (props) => {
            
  
 
-export default App;
+export default memo(App);

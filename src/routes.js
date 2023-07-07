@@ -18,6 +18,8 @@ var APIRoutes = {
     GetNoticedFiles: host + '/FileManagement/GetNoticedFiles',
     GetFolderPath: host + '/FileManagement/GetFolderPath',
     GetRecentFiles: host + '/FileManagement/GetRecentFiles',
+    DeleteFile: host + '/FileManagement/RemoveFilePermanently',
+    DeleteFolder: host + '/FileManagement/Deletefoler'
 }
 
 export default APIRoutes

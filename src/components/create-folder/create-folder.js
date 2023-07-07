@@ -8,8 +8,9 @@ import { Modal } from "@mui/material";
 import { Box } from "@mui/material";
 import './create-folder.css'
 import Helper from "../../Helper";
-import cloud from '../../images/cloud.png'
+import cloud from '../../images/cloud1.png'
 import HTTPservice from "../../HTTPservice";
+import { memo } from 'react';
 
 
 const CreateFolder = (props) => {
@@ -70,4 +71,4 @@ const CreateFolder = (props) => {
         )
 }
 
-export default CreateFolder
+export default memo(CreateFolder)

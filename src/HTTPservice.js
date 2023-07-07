@@ -4,7 +4,7 @@ import Helper from "./Helper";
 
 const HTTPservice ={
     get : (url,data) => {
-        const access_token =Helper.getCookie('access_token');
+        const access_token = Helper.getCookie('access_token');
         const readyHeader = 'Bearer ' + access_token;
         return axios({
                 method: 'get',
@@ -14,7 +14,7 @@ const HTTPservice ={
               })
      },
      post : (url,data) => {
-        const access_token =Helper.getCookie('access_token');
+        const access_token = Helper.getCookie('access_token');
         const readyHeader = 'Bearer ' + access_token;
         return axios({
             method: 'post',

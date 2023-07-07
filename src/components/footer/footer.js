@@ -1,5 +1,5 @@
 import styles from './footer.css'
-
+import { memo } from 'react'
 const Footer = () => {
     console.log('footer')
     return(
@@ -9,4 +9,4 @@ const Footer = () => {
     )
 }
 
-export default Footer
+export default memo(Footer)

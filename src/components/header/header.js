@@ -2,16 +2,19 @@ import { TextField } from '@mui/material'
 import { Avatar } from '@mui/material'
 import { blue } from '@mui/material/colors'
 import './header.css'
-import cloud from '../../images/cloud.png'
-import { Component, useState } from 'react'
+import cloud from '../../images/cloud1.png'
+import { Component, useState, memo } from 'react'
 import axios from 'axios'
 import APIRoutes from '../../routes'
 import Helper from '../../Helper'
+import { useNavigate } from 'react-router-dom'
+import LogoutIcon from '@mui/icons-material/Logout';
 import HTTPservice from '../../HTTPservice.js';
 
 
 const Head = (props) =>{  
     const [value, setValue] = useState('');
+    const history = useNavigate();
     console.log('renderHeader')
   
     const onSearch = (e) => {
@@ -37,6 +40,11 @@ const Head = (props) =>{
                 console.log(e);
             })
         }
+    }
+
+    const onExit = () => {
+        Helper.clearCookies()
+        history('/');
     }
     
         return(
@@ -64,9 +72,12 @@ const Head = (props) =>{
                 <div className="avatar">
                     <h3  className='username'>{props.username ? props.username : "Loading..."}</h3>
                     <Avatar sx={{ bgcolor: blue[500], width: 45, height: 45, fontSize: 26,  }}>{props.username.slice(0,1)}</Avatar>
+                    <div className='logoutIcon'>
+                        <LogoutIcon onClick={onExit} />
+                    </div>
                 </div>
             </div>   
         )
 }
 
-export default Head
+export default memo(Head)

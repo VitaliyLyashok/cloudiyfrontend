@@ -45,7 +45,7 @@ img{
 }
 
 .avatar{
-    width: 14%;
+    width: 16%;
     display: flex;
     justify-content: flex-end;
     align-items: center;
@@ -58,4 +58,28 @@ img{
     display: flex;
     margin: 0 auto;
     margin-right: 25px;
+}
+
+.logoutIcon{
+    cursor: pointer;
+    color: rgb(0, 145, 223);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 40px;
+    width: 35px;
+    height: 35px;
+    font-size: 17px;
+    border: none;
+    cursor: pointer;
+    border-radius: 20%;
+    border: 2px solid white;
+
+}
+
+.logoutIcon:hover{
+    background-color: #F0F0F0;
+    transition-duration: 0.4s;
+    border: 2px solid rgb(0, 145, 223);
+
 }
